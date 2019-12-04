@@ -1,9 +1,9 @@
-module Sample where
+module Main where
 
 import           Data.Char
 
-greet :: IO ()
-greet = putStrLn "Hello, world"
+main :: IO ()
+main = putStrLn "Hello, world"
 
 myconcat :: [[a]] -> [a]
 myconcat xss = [ x | xs <- xss, x <- xs ]
@@ -33,3 +33,45 @@ shift n c | isLower c = int2let $ (let2int c + n) `mod` 26
 encode :: Int -> String -> String
 encode n str = [ shift n x | x <- str ]
 
+percent :: Int -> Int -> Float
+percent x y = (fromIntegral x / fromIntegral y) * 100
+
+freqs :: String -> [Float]
+freqs cs = [ percent (count c cs) n | c <- ['a' .. 'z'] ] where n = lowers cs
+
+chisqr :: [Float] -> [Float] -> Float
+chisqr os es = sum [ ((o - e) ** 2) / e | (o, e) <- zip os es ]
+
+rotate :: Int -> [a] -> [a]
+rotate n xs = drop (n `mod` len) xs ++ take (n `mod` len) xs
+  where len = length xs
+
+table :: [Float]
+table =
+  [ 8.1
+  , 1.5
+  , 2.8
+  , 4.2
+  , 12.7
+  , 2.2
+  , 2.0
+  , 6.1
+  , 7.0
+  , 0.2
+  , 0.3
+  , 4.0
+  , 2.4
+  , 6.7
+  , 7.5
+  , 1.9
+  , 0.1
+  , 6.0
+  , 6.3
+  , 9.0
+  , 2.8
+  , 1.0
+  , 2.4
+  , 0.2
+  , 2.0
+  , 0.1
+  ]
