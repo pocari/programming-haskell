@@ -18,19 +18,21 @@ positions :: Eq a => a -> [a] -> [Int]
 positions x xs = [ i | (i, y) <- zip [0 ..] xs, y == x ]
 
 lowers :: String -> Int
-lowers str = length [ x | x <- str, 'a' <= x && x <= 'z' ]
+lowers str =
+  length [ x | x <- str, ('a' <= x && x <= 'z') || ('A' <= x && x <= 'Z') ]
 
 count :: Char -> String -> Int
 count c str = length [ x | x <- str, x == c ]
 
 let2int :: Char -> Int
-let2int c = ord c - ord 'a'
+let2int c = ord (toLower c) - ord 'a'
 
 int2let :: Int -> Char
 int2let n = chr $ ord 'a' + n
 
 shift :: Int -> Char -> Char
 shift n c | isLower c = int2let $ (let2int c + n) `mod` 26
+          | isUpper c = toUpper (int2let $ (let2int c + n) `mod` 26)
           | otherwise = c
 
 encode :: Int -> String -> String
@@ -49,12 +51,15 @@ rotate :: Int -> [a] -> [a]
 rotate n xs = drop (n `mod` len) xs ++ take (n `mod` len) xs
   where len = length xs
 
+toLowerStr :: String -> String
+toLowerStr xs = [ toLower c | c <- xs ]
+
 crack :: String -> String
 crack xs = encode (-factor) xs
  where
   factor = head (positions (minimum chitab) chitab)
   chitab = [ chisqr (rotate n table') table | n <- [0 .. 25] ]
-  table' = freqs xs
+  table' = freqs $ toLowerStr xs
 
 table :: [Float]
 table =
