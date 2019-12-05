@@ -14,6 +14,9 @@ myfirsts xs = [ x | (x, _) <- xs ]
 myoverN :: Ord a => a -> a -> Bool
 myoverN x y = x > y
 
+positions :: Eq a => a -> [a] -> [Int]
+positions x xs = [ i | (i, y) <- zip [0 ..] xs, y == x ]
+
 lowers :: String -> Int
 lowers str = length [ x | x <- str, 'a' <= x && x <= 'z' ]
 
