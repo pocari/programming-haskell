@@ -49,6 +49,13 @@ rotate :: Int -> [a] -> [a]
 rotate n xs = drop (n `mod` len) xs ++ take (n `mod` len) xs
   where len = length xs
 
+crack :: String -> String
+crack xs = encode (-factor) xs
+ where
+  factor = head (positions (minimum chitab) chitab)
+  chitab = [ chisqr (rotate n table') table | n <- [0 .. 25] ]
+  table' = freqs xs
+
 table :: [Float]
 table =
   [ 8.1
