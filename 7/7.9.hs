@@ -94,3 +94,5 @@ mapUnfold f = unfold null (\x -> f $ head x) tail
 iterateUnfold :: (a -> a) -> a -> [a]
 iterateUnfold f = unfold (const False) f f
 
+-- 7.9.7
+-- sample.hs を拡張
