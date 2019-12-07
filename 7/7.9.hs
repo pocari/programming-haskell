@@ -96,3 +96,34 @@ iterateUnfold f = unfold (const False) f f
 
 -- 7.9.7
 -- sample.hs を拡張
+
+-- 7.9.8
+-- 7.9.7を使って下記のように確認
+-- *Sample> let hoge = encode "abc"
+-- *Sample> hoge
+-- [1,0,0,0,0,1,1,0,0,1,0,0,0,1,1,0,1,1,0,0,0,1,1,0,0]
+-- *Sample> let foo = [0] ++ (tail hoge)
+-- *Sample> hoge
+-- [1,0,0,0,0,1,1,0,0,1,0,0,0,1,1,0,1,1,0,0,0,1,1,0,0]
+-- *Sample> foo
+-- [0,0,0,0,0,1,1,0,0,1,0,0,0,1,1,0,1,1,0,0,0,1,1,0,0]
+-- *Sample> decode hoge
+-- "abc"
+-- *Sample> decode foo
+-- "*** Exception: invalid Bits
+-- CallStack (from HasCallStack):
+--   error, called at /Users/pocari/dev/tmp/programming-haskell/7/sample.hs:44:30 in main:Sample
+
+-- 7.9.9
+altMap' :: (a -> b) -> (a -> b) -> [a] -> [b]
+altMap' f g xs = map (\(x, h) -> h x) (zip xs (concat $ repeat [f, g]))
+
+-- 7.9.10
+luhnDouble :: Int -> Int
+luhnDouble n | n2 > 9    = n2 - 9
+             | otherwise = n2
+  where n2 = n * 2
+
+luhn :: [Int] -> Bool
+luhn xs = total `mod` 10 == 0 where total = sum $ altMap' luhnDouble id xs
+
