@@ -6,7 +6,6 @@ rmdups (x : xs) = x : rmdups (filter (/= x) xs)
 
 type Pos = (Int, Int)
 type Assoc k v = [(k, v)]
-
 find :: Eq k => k -> Assoc k v -> v
 find k x = head [ v | (k', v) <- x, k == k' ]
 
@@ -75,4 +74,52 @@ occurs x (Node l y r) = x == y || occurs x l || occurs x r
 flatten :: Tree a -> [a]
 flatten (Leaf x    ) = [x]
 flatten (Node l y r) = flatten l ++ [y] ++ flatten r
+
+-----------------------------------------------------------------------------
+-- tautology checker
+
+data Prop = Const Bool
+          | Var Char
+          | Not Prop
+          | And Prop Prop
+          | Imply Prop Prop
+          deriving Show
+
+p1 :: Prop
+p1 = And (Var 'A') (Not (Var 'A'))
+
+p2 :: Prop
+p2 = Imply (And (Var 'A') (Var 'B')) (Var 'A')
+
+p3 :: Prop
+p3 = Imply (Var 'A') (And (Var 'A') (Var 'B'))
+
+p4 :: Prop
+p4 = Imply (And (Var 'A') (Imply (Var 'A') (Var 'B'))) (Var 'B')
+
+type Subst = Assoc Char Bool
+
+eval :: Subst -> Prop -> Bool
+eval _ (Const b  ) = b
+eval s (Var   c  ) = find c s
+eval s (Not   p  ) = not (eval s p)
+eval s (And   x y) = eval s x && eval s y
+eval s (Imply x y) = eval s x <= eval s y
+
+vars :: Prop -> [Char]
+vars (Const _  ) = []
+vars (Var   c  ) = [c]
+vars (Not   p  ) = vars p
+vars (And   x y) = vars x ++ vars y
+vars (Imply x y) = vars x ++ vars y
+
+bools :: Int -> [[Bool]]
+bools 0 = [[]]
+bools n = map (False :) bss ++ map (True :) bss where bss = bools (n - 1)
+
+substs :: Prop -> [Subst]
+substs p = map (zip vs) (bools (length vs)) where vs = rmdups (vars p)
+
+isTaut :: Prop -> Bool
+isTaut p = and [ eval s p | s <- substs p ]
 
