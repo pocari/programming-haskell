@@ -75,6 +75,13 @@ occurs :: Eq a => a -> Tree a -> Bool
 occurs x (Leaf y    ) = x == y
 occurs x (Node l y r) = x == y || occurs x l || occurs x r
 
+occurs' :: Ord a => a -> Tree a -> Bool
+occurs' x (Leaf y) = x == y
+occurs' x (Node l y r) | z == EQ   = True
+                       | z == LT   = occurs' x l
+                       | otherwise = occurs' x r
+  where z = compare x y
+
 flatten :: Tree a -> [a]
 flatten (Leaf x    ) = [x]
 flatten (Node l y r) = flatten l ++ [y] ++ flatten r
