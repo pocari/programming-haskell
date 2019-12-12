@@ -1,6 +1,7 @@
 module Chap893 where
 
 data Tree a = Leaf a | Node (Tree a) (Tree a)
+            deriving Show
 
 --             .
 --          /     \
@@ -47,4 +48,10 @@ countLeaf (Node l r) = countLeaf l + countLeaf r
 balanced :: Tree a -> Bool
 balanced (Leaf _  ) = True
 balanced (Node x y) = abs (countLeaf x - countLeaf y) <= 1
+
+balance :: [a] -> Tree a
+balance []  = error "hoge"
+balance [x] = Leaf x
+balance xs  = Node (balance x) (balance y)
+  where (x, y) = splitAt (length xs `div` 2) xs
 
