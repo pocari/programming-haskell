@@ -93,6 +93,8 @@ data Prop = Const Bool
           | Var Char
           | Not Prop
           | And Prop Prop
+          | Or Prop Prop
+          | Eql Prop Prop
           | Imply Prop Prop
           deriving Show
 
@@ -108,6 +110,18 @@ p3 = Imply (Var 'A') (And (Var 'A') (Var 'B'))
 p4 :: Prop
 p4 = Imply (And (Var 'A') (Imply (Var 'A') (Var 'B'))) (Var 'B')
 
+p5 :: Prop
+p5 = Or (Var 'A') (Not (Var 'A'))
+
+p6 :: Prop
+p6 = Or (Var 'A') (Not (Var 'B'))
+
+p7 :: Prop
+p7 = Eql (Var 'A') (Not (Var 'A'))
+
+p8 :: Prop
+p8 = Eql (Not (Var 'A')) (Not (Var 'A'))
+
 type Subst = Assoc Char Bool
 
 eval :: Subst -> Prop -> Bool
@@ -115,6 +129,8 @@ eval _ (Const b  ) = b
 eval s (Var   c  ) = find c s
 eval s (Not   p  ) = not (eval s p)
 eval s (And   x y) = eval s x && eval s y
+eval s (Or    x y) = eval s x || eval s y
+eval s (Eql   x y) = eval s x == eval s y
 eval s (Imply x y) = eval s x <= eval s y
 
 vars :: Prop -> [Char]
@@ -122,6 +138,8 @@ vars (Const _  ) = []
 vars (Var   c  ) = [c]
 vars (Not   p  ) = vars p
 vars (And   x y) = vars x ++ vars y
+vars (Or    x y) = vars x ++ vars y
+vars (Eql   x y) = vars x ++ vars y
 vars (Imply x y) = vars x ++ vars y
 
 bools :: Int -> [[Bool]]
