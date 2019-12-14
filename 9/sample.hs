@@ -29,6 +29,9 @@ instance Show Expr where
     brak (Val e) = show e
     brak e       = "(" ++ show e ++ ")"
 
+e1 :: Expr
+e1 = App Mul (App Add (Val 1) (Val 50)) (App Sub (Val 25) (Val 10))
+
 values :: Expr -> [Int]
 values (Val e    ) = [e]
 values (App _ l r) = values l ++ values r
@@ -48,4 +51,10 @@ interleave x (y : ys) = (x : y : ys) : map (y :) (interleave x ys)
 perms :: [a] -> [[a]]
 perms []       = [[]]
 perms (x : xs) = concatMap (interleave x) (perms xs)
+
+choices :: [a] -> [[a]]
+choices = concatMap perms . subs
+
+solution :: Expr -> [Int] -> Int -> Bool
+solution e xs n = elem (values e) (choices xs) && eval e == [n]
 
