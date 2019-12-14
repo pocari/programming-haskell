@@ -58,3 +58,23 @@ choices = concatMap perms . subs
 solution :: Expr -> [Int] -> Int -> Bool
 solution e xs n = elem (values e) (choices xs) && eval e == [n]
 
+split :: [a] -> [([a], [a])]
+split []       = []
+split [_     ] = []
+split (x : xs) = ([x], xs) : [ (x : ls, rs) | (ls, rs) <- split xs ]
+
+combine :: Expr -> Expr -> [Expr]
+combine l r = [ App o l r | o <- ops ]
+
+ops :: [Op]
+ops = [Add, Sub, Mul, Div]
+
+exprs :: [Int] -> [Expr]
+exprs []  = []
+exprs [n] = [Val n]
+exprs ns =
+  [ e | (ls, rs) <- split ns, l <- exprs ls, r <- exprs rs, e <- combine l r ]
+
+solutions :: [Int] -> Int -> [Expr]
+solutions ns n = [ e | ns' <- choices ns, e <- exprs ns', eval e == [n] ]
+
