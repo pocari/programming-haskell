@@ -1,6 +1,7 @@
 module Sample where
 
 import           System.IO
+import           Data.Char
 
 wrapper :: IO ()
 wrapper = do
@@ -50,6 +51,8 @@ strlen = do
   putStr' (show (length x))
   putStrLn' " characters."
 
+----------------------------------------------------------
+-- handman
 sgetLine :: IO String
 sgetLine = do
   x <- getCh
@@ -88,3 +91,79 @@ hangman = do
   word <- sgetLine
   putStrLn "Try to guess it:"
   play word
+
+----------------------------------------------------------
+-- nim
+
+next :: Int -> Int
+next 1 = 2
+next 2 = 1
+next _ = error "invalid argument"
+
+type Board = [Int]
+
+initial :: Board
+initial = [5, 4, 3, 2, 1]
+
+finished :: Board -> Bool
+finished = all (== 0)
+
+valid :: Board -> Int -> Int -> Bool
+valid b row n = b !! (row - 1) >= n
+
+move :: Board -> Int -> Int -> Board
+move b row num = [ update r n | (r, n) <- zip [1 ..] b ]
+  where update r n = if r == row then n - num else n
+
+putRow :: Int -> Int -> IO ()
+putRow r n = do
+  putStr (show r)
+  putStr ":"
+  putStrLn (concat (replicate n " *"))
+
+putBoard :: Board -> IO ()
+putBoard = putBoardHelper 1
+ where
+  putBoardHelper _ []       = putStrLn ""
+  putBoardHelper n (x : xs) = do
+    putRow n x
+    putBoardHelper (n + 1) xs
+
+newline :: IO ()
+newline = putChar '\n'
+
+getDigit :: String -> IO Int
+getDigit prompt = do
+  putStr prompt
+  x <- getChar
+  newline
+  if isDigit x
+    then return (digitToInt x)
+    else do
+      putStrLn "ERROR: Invalid digit"
+      getDigit prompt
+
+playNim :: Board -> Int -> IO ()
+playNim board player = do
+  newline
+  putBoard board
+  if finished board
+    then do
+      newline
+      putStr "Player "
+      putStr (show (next player))
+      putStrL " Wins !!"
+    else do
+      newline
+      putStr "Player "
+      putStrLn (show player)
+      row <- getDigit "Enter a row number: "
+      num <- getDigit "Stars to remove: "
+      if valid board row num
+        then playNim (move board row num) (next player)
+        else do
+          newline
+          putStrLn "ERROR: invalid move"
+          playNim board player
+
+
