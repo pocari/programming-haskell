@@ -14,11 +14,21 @@ instance Show Op where
 -- valid Mul _ _ = True
 -- valid Div x y = x `mod` y == 0
 
+-- valid :: Op -> Int -> Int -> Bool
+-- valid Add x y = x <= y
+-- valid Sub x y = x > y
+-- valid Mul x y = x /= 1 && y /= 1 && x <= y
+-- valid Div x y = x `mod` y == 0
+
+-- 9.11.5 のvalid
+-- length [e | ns' <- choices [1, 3, 7, 10, 25, 50], e <- exprs ns', not $ null $ eval e]
+-- 10839369
+-- になる
 valid :: Op -> Int -> Int -> Bool
-valid Add x y = x <= y
-valid Sub x y = x > y
-valid Mul x y = x /= 1 && y /= 1 && x <= y
-valid Div x y = x `mod` y == 0
+valid Add _ _ = True
+valid Sub x y = True
+valid Mul _ _ = True
+valid Div x y = y /= 0 && x `mod` y == 0
 
 apply :: Op -> Int -> Int -> Int
 apply Add x y = x + y
@@ -61,6 +71,10 @@ perms (x : xs) = concatMap (interleave x) (perms xs)
 choices :: [a] -> [[a]]
 choices = concatMap perms . subs
 
+-- 9.11.1
+choices' :: [a] -> [[a]]
+choices' ns = [ ps | sub <- subs ns, ps <- perms sub ]
+
 solution :: Expr -> [Int] -> Int -> Bool
 solution e xs n = elem (values e) (choices xs) && eval e == [n]
 
@@ -68,6 +82,11 @@ split :: [a] -> [([a], [a])]
 split []       = []
 split [_     ] = []
 split (x : xs) = ([x], xs) : [ (x : ls, rs) | (ls, rs) <- split xs ]
+
+split' :: [a] -> [([a], [a])]
+split' []       = []
+split' [x     ] = [([x], [])]
+split' (x : xs) = ([x], xs) : [ (x : ls, rs) | (ls, rs) <- split' xs ]
 
 combine :: Expr -> Expr -> [Expr]
 combine l r = [ App o l r | o <- ops ]
@@ -83,6 +102,17 @@ exprs ns =
 
 solutions :: [Int] -> Int -> [Expr]
 solutions ns n = [ e | ns' <- choices ns, e <- exprs ns', eval e == [n] ]
+
+
+-- 9.11.4
+-- 可能な式の確認
+-- length [e | ns' <- choices [1, 3, 7, 10, 25, 50], e <- exprs ns']
+-- 33665406
+--
+-- 有効な式の確認
+-- length [e | ns' <- choices [1, 3, 7, 10, 25, 50], e <- exprs ns', not $ null $ eval e]
+-- でいけるとおもったけど、366922 になってしまった。
+-- とおもったけど、章中ででてきた改良validが使われてるせいだった、旧validを使うとちゃんと 4672540に。
 
 type Result = (Expr, Int)
 
@@ -102,4 +132,15 @@ combine' (l, x) (r, y) = [ (App o l r, apply o x y) | o <- ops, valid o x y ]
 
 solutions' :: [Int] -> Int -> [Expr]
 solutions' ns n = [ e | ns' <- choices ns, (e, m) <- results ns', m == n ]
+
+-- 9.11.2
+isChoice :: Eq a => [a] -> [a] -> Bool
+isChoice [] _        = True
+isChoice _  []       = False
+isChoice xs (y : ys) = isChoice (dropn y xs) ys
+
+dropn :: Eq a => a -> [a] -> [a]
+dropn _ [] = []
+dropn x (y : ys) | x == y    = dropn x ys
+                 | otherwise = y : dropn x ys
 
