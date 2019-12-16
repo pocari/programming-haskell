@@ -152,7 +152,7 @@ playNim board player = do
       newline
       putStr "Player "
       putStr (show (next player))
-      putStrL " Wins !!"
+      putStrLn " Wins !!"
     else do
       newline
       putStr "Player "
