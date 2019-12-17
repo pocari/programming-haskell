@@ -166,4 +166,3 @@ playNim board player = do
           putStrLn "ERROR: invalid move"
           playNim board player
 
-
