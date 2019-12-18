@@ -121,13 +121,17 @@ putRow r n = do
   putStr ":"
   putStrLn (concat (replicate n " *"))
 
+-- putBoard :: Board -> IO ()
+-- putBoard = putBoardHelper 1
+--  where
+--   putBoardHelper _ []       = putStrLn ""
+--   putBoardHelper n (x : xs) = do
+--     putRow n x
+--     putBoardHelper (n + 1) xs
+
+-- 10.10.3
 putBoard :: Board -> IO ()
-putBoard = putBoardHelper 1
- where
-  putBoardHelper _ []       = putStrLn ""
-  putBoardHelper n (x : xs) = do
-    putRow n x
-    putBoardHelper (n + 1) xs
+putBoard xs = sequence_ $ map (\(i, x) -> putRow i x) (zip [1 ..] xs)
 
 newline :: IO ()
 newline = putChar '\n'
