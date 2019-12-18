@@ -28,5 +28,17 @@ adder = do
     xs <- getLine
     adderHelper (s + (read xs :: Int)) (r - 1)
 
+strs' :: IO [String]
+strs' = do
+  putStr "How many numbers?: "
+  x <- getChar
+  newline
+  sequence $ replicate (digitToInt x) getLine
+
+adder' :: IO ()
+adder' = do
+  xs <- strs'
+  putStrLn $ "The total is " ++ show (sum $ map (\x -> read x :: Int) xs)
+
 
 
