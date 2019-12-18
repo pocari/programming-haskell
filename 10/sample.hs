@@ -72,6 +72,27 @@ getCh = do
   hSetEcho stdin True
   return x
 
+-- 10.10.6
+readLine :: IO String
+readLine = do
+  readLineHelper []
+ where
+  readLineHelper :: String -> IO String
+  readLineHelper xs = do
+    c <- getCh
+    case c of
+      '\n' -> do
+        newline
+        return $ reverse xs
+      '\DEL' -> do
+        putChar '\r'
+        mapM_ putChar (reverse (' ' : (tail xs)))
+        putChar '\b'
+        readLineHelper $ tail xs
+      _ -> do
+        putChar c
+        readLineHelper (c : xs)
+
 match :: String -> String -> String
 match xs ys = [ if x `elem` ys then x else '-' | x <- xs ]
 
