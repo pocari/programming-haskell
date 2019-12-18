@@ -85,8 +85,11 @@ readLine = do
         newline
         return $ reverse xs
       '\DEL' -> do
+        -- カーソルを戻した一文字を消すために行頭まで戻る
         putChar '\r'
-        mapM_ putChar (reverse (' ' : (tail xs)))
+        -- 最後に入力された文字を削除して、その分を空白にして表示する
+        putStr $ reverse (' ' : tail xs)
+        -- カーソルを一文字戻す
         putChar '\b'
         readLineHelper $ tail xs
       _ -> do
