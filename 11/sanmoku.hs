@@ -1,6 +1,6 @@
 module Sanmoku where
 
--- import           Data.Char
+import           Data.Char
 import           Data.List
 -- import           System.IO
 
@@ -104,4 +104,25 @@ showRow ps =
   , join "|" (map showPlayer ps)
   , join "|" (replicate size "   ")
   ]
+
+valid :: Grid -> Int -> Bool
+valid g n = 0 <= n && n < (size * size) && concat g !! n == B
+
+chop :: Int -> [a] -> [[a]]
+chop _ [] = []
+chop n xs = take n xs : chop n (drop n xs)
+
+move :: Grid -> Int -> Player -> [Grid]
+move g i p = [ chop size (xs ++ [p] ++ ys) | valid g i ]
+  where (xs, B : ys) = splitAt i (concat g)
+
+getNat :: String -> IO Int
+getNat prompt = do
+  putStr prompt
+  xs <- getLine
+  if xs /= [] && all isDigit xs
+    then return (read xs)
+    else do
+      putStrLn "ERROR: Invalid number"
+      getNat prompt
 
