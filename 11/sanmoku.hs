@@ -7,6 +7,14 @@ import           Data.List
 size :: Int
 size = 3
 
+cls :: IO ()
+cls = putStr "\ESC[2J"
+
+type Pos = (Int, Int)
+
+goto :: Pos -> IO ()
+goto (x, y) = putStr ("\ESC[" ++ show y ++ ";" ++ show x ++ "H")
+
 type Grid = [[Player]]
 
 data Player = O | B | X
@@ -125,4 +133,30 @@ getNat prompt = do
     else do
       putStrLn "ERROR: Invalid number"
       getNat prompt
+
+tictactoe :: IO ()
+tictactoe = run empty O
+
+run :: Grid -> Player -> IO ()
+run g p = do
+  cls
+  goto (1, 1)
+  putGrid g
+  run' g p
+
+run' :: Grid -> Player -> IO ()
+run' g p
+  | wins O g = putStrLn "Player O wins\n"
+  | wins X g = putStrLn "Player X wins!\n"
+  | full g = putStrLn "It's a draw\n"
+  | otherwise = do
+    i <- getNat (prompt p)
+    case move g i p of
+      [] -> do
+        putStrLn "ERROR: Invalid move"
+        run' g p
+      [g'] -> run g' (next p)
+
+prompt :: Player -> String
+prompt p = "Player " ++ show p ++ ", enter your move: "
 
