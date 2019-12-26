@@ -1,8 +1,6 @@
-module Sanmoku where
-
 import           Data.Char
 import           Data.List
--- import           System.IO
+import           System.IO
 
 size :: Int
 size = 3
@@ -195,3 +193,34 @@ bestmove g p = head [ g' | Node (g', p') _ <- ts, p' == best ]
   tree              = prune depth (gametree g p)
   Node (_, best) ts = minmax tree
 
+main :: IO ()
+main = do
+  hSetBuffering stdout NoBuffering
+  play empty O
+
+play :: Grid -> Player -> IO ()
+play g p = do
+  cls
+  goto (1, 1)
+  putGrid g
+  play' g p
+
+play' :: Grid -> Player -> IO ()
+play' g p
+  | wins O g = putStrLn "Player O wins!\n"
+  | wins X g = putStrLn "Player X wins!\n"
+  | full g = putStrLn "It's a draw!\n"
+  | p == O = do
+    i <- getNat (prompt p)
+    case move g i p of
+      [] -> do
+        putStrLn "ERROR: Invalid move"
+        play g p
+      [g'] -> play g' (next p)
+  | p == X = do
+    putStr "Player X is thinking ..."
+    (play $! bestmove g p) (next p) -- $! がよくわからない
+
+
+gridx :: Grid
+gridx = [[O, B, B], [X, X, O], [X, O, B]]
