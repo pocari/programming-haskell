@@ -190,14 +190,12 @@ minimax (Node g ts) | turn g == O = Node (g, minimum ps) ts'
   ts' = map minimax ts
   ps  = [ p | Node (_, p) _ <- ts' ]
 
-bestmove :: Grid -> Player -> Grid
--- bestmove g p = head [ g' | Node (g', p') _ <- ts, p' == best ]
-bestmove g p = g''
+bestmove :: Tree Grid -> Grid -> Player -> Grid
+bestmove tree g p = g''
  where
   Node (g'', _) _ = minMove
   minMove = minimumBy (\x y -> compare (treeDepth x) (treeDepth y)) moves
   moves = [ Node (g', p') ts' | Node (g', p') ts' <- ts, p' == best ]
-  tree = prune depth (gametree g p)
   Node (_, best) ts = minimax tree
 
 -- -- 11.13.2
@@ -225,17 +223,20 @@ main :: IO ()
 main = do
   hSetBuffering stdout NoBuffering
   player <- selectFirstOrSecond
-  play empty player
+  play (gametree empty player) empty player
 
-play :: Grid -> Player -> IO ()
-play g p = do
+findTree :: Grid -> [Tree Grid] -> Tree Grid
+findTree g ts = head [ t | t@(Node g' _) <- ts, g == g' ]
+
+play :: Tree Grid -> Grid -> Player -> IO ()
+play tree g p = do
   cls
   goto (1, 1)
   putGrid g
-  play' g p
+  play' tree g p
 
-play' :: Grid -> Player -> IO ()
-play' g p
+play' :: Tree Grid -> Grid -> Player -> IO ()
+play' tree@(Node _ ts) g p
   | wins O g = putStrLn "Player O wins!\n"
   | wins X g = putStrLn "Player X wins!\n"
   | full g = putStrLn "It's a draw!\n"
@@ -244,12 +245,12 @@ play' g p
     case move g i p of
       [] -> do
         putStrLn "ERROR: Invalid move"
-        play g p
-      [g'] -> play g' (next p)
+        play tree g p
+      [g'] -> play (findTree g' ts) g' (next p)
   | p == X = do
     putStr "Player X is thinking ..."
-    (play $! bestmoves) (next p) -- $! がよくわからない
-  where bestmoves = bestmove g p
+    (play (findTree bm ts) $! bm) (next p) -- $! がよくわからない
+  where bm = bestmove tree g p
 
 gridx :: Grid
 gridx = [[O, B, B], [X, X, O], [X, O, B]]
