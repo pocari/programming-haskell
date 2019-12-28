@@ -196,13 +196,12 @@ bestmove g p = head [ g' | Node (g', p') _ <- ts, p' == best ]
   tree              = prune depth (gametree g p)
   Node (_, best) ts = minimax tree
 
--- 11.13.2
-bestmove' :: Grid -> Player -> [Grid]
--- bestmove' g p = moveList !! (randomRIO (0, (length moveList) - 1))
-bestmove' g p = [ g' | Node (g', p') _ <- ts, p' == best ]
- where
-  tree              = prune depth (gametree g p)
-  Node (_, best) ts = minimax tree
+-- -- 11.13.2
+-- bestmove' :: Grid -> Player -> [Grid]
+-- bestmove' g p = [ g' | Node (g', p') _ <- ts, p' == best ]
+--  where
+--   tree              = prune depth (gametree g p)
+--   Node (_, best) ts = minimax tree
 
 main :: IO ()
 main = do
@@ -230,11 +229,8 @@ play' g p
       [g'] -> play g' (next p)
   | p == X = do
     putStr "Player X is thinking ..."
-    pos <- randomRIO (0, length bestmoves - 1)
-    (play $! (bestmoves !! pos)) (next p) -- $! がよくわからない
- where
-  bestmoves :: [Grid]
-  bestmoves = bestmove' g p
+    (play $! bestmoves) (next p) -- $! がよくわからない
+  where bestmoves = bestmove g p
 
 gridx :: Grid
 gridx = [[O, B, B], [X, X, O], [X, O, B]]
