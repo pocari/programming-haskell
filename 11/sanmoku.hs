@@ -1,3 +1,5 @@
+module Sanmoku where
+
 import           Data.Char
 import           Data.List
 import           System.IO
@@ -224,3 +226,25 @@ play' g p
 
 gridx :: Grid
 gridx = [[O, B, B], [X, X, O], [X, O, B]]
+
+-----------------------------------------------------------------------
+-- practice
+
+-- data Tree a = Node a [Tree a]
+--             deriving Show
+
+treeLength :: Tree a -> Int
+treeLength (Node _ []) = 1
+treeLength (Node _ ts) = 1 + sum (map treeLength ts)
+
+treeDepth :: Tree a -> Int
+treeDepth (Node _ []) = 0
+treeDepth (Node _ ts) = 1 + maximum (map treeDepth ts)
+
+-- 11.13.1
+p11_13_1 :: IO ()
+p11_13_1 = do
+  putStrLn $ "node length: " ++ show (treeLength tree)
+  putStrLn $ "tree depth: " ++ show (treeDepth tree)
+  where tree = gametree empty O
+
