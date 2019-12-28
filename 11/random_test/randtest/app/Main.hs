@@ -191,9 +191,13 @@ minimax (Node g ts) | turn g == O = Node (g, minimum ps) ts'
   ps  = [ p | Node (_, p) _ <- ts' ]
 
 bestmove :: Grid -> Player -> Grid
-bestmove g p = head [ g' | Node (g', p') _ <- ts, p' == best ]
+-- bestmove g p = head [ g' | Node (g', p') _ <- ts, p' == best ]
+bestmove g p = g''
  where
-  tree              = prune depth (gametree g p)
+  Node (g'', _) _ = minMove
+  minMove = minimumBy (\x y -> compare (treeDepth x) (treeDepth y)) moves
+  moves = [ Node (g', p') ts' | Node (g', p') ts' <- ts, p' == best ]
+  tree = prune depth (gametree g p)
   Node (_, best) ts = minimax tree
 
 -- -- 11.13.2
