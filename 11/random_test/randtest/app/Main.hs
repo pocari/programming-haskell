@@ -1,8 +1,9 @@
-module Sanmoku where
+module Main where
 
 import           Data.Char
 import           Data.List
 import           System.IO
+import           System.Random                  ( randomRIO )
 
 size :: Int
 size = 3
@@ -195,6 +196,14 @@ bestmove g p = head [ g' | Node (g', p') _ <- ts, p' == best ]
   tree              = prune depth (gametree g p)
   Node (_, best) ts = minimax tree
 
+-- 11.13.2
+bestmove' :: Grid -> Player -> [Grid]
+-- bestmove' g p = moveList !! (randomRIO (0, (length moveList) - 1))
+bestmove' g p = [ g' | Node (g', p') _ <- ts, p' == best ]
+ where
+  tree              = prune depth (gametree g p)
+  Node (_, best) ts = minimax tree
+
 main :: IO ()
 main = do
   hSetBuffering stdout NoBuffering
@@ -221,8 +230,11 @@ play' g p
       [g'] -> play g' (next p)
   | p == X = do
     putStr "Player X is thinking ..."
-    (play $! bestmove g p) (next p) -- $! がよくわからない
-
+    pos <- randomRIO (0, length bestmoves - 1)
+    (play $! (bestmoves !! pos)) (next p) -- $! がよくわからない
+ where
+  bestmoves :: [Grid]
+  bestmoves = bestmove' g p
 
 gridx :: Grid
 gridx = [[O, B, B], [X, X, O], [X, O, B]]
@@ -248,3 +260,5 @@ p11_13_1 = do
   putStrLn $ "tree depth: " ++ show (treeDepth tree)
   where tree = gametree empty O
 
+-- 11.13.2
+-- bestmoveを変更
