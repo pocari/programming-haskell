@@ -207,10 +207,25 @@ bestmove g p = g''
 --   tree              = prune depth (gametree g p)
 --   Node (_, best) ts = minimax tree
 
+selectFirstOrSecond :: IO Player
+selectFirstOrSecond = do
+  putStr "first or second?: "
+  xs <- getLine
+  case xs of
+    "first" -> do
+      return O
+    "second" -> do
+      return X
+    _ -> do
+      putStrLn "ERRRO: select first or second"
+      selectFirstOrSecond
+
+
 main :: IO ()
 main = do
   hSetBuffering stdout NoBuffering
-  play empty O
+  player <- selectFirstOrSecond
+  play empty player
 
 play :: Grid -> Player -> IO ()
 play g p = do
