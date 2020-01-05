@@ -81,3 +81,44 @@ instance Applicative MyZipList where
 -- y :: Maby (Int -> a)
 -- z : Maybe Int
 -- 右辺
+--
+
+-- 12.5.6
+-- Monad
+-- return :: a -> m a
+-- (>>=) :: m a -> (a -> m b) -> m b
+
+-- (r -> a)
+-- ((->) r a)
+-- pure :: a -> f a
+--         a -> ((->) r a)
+--         a -> (r -> a)
+-- (<*>) :: (r -> (a -> b)) -> (r -> a) -> (r -> b)
+newtype MyFunc r a = F (r -> a)
+
+applyF :: MyFunc r a -> r -> a
+applyF (F f) = f
+
+
+-- 12.5.3から
+instance Functor (MyFunc r) where
+  -- fmap :: (a -> b) -> MyFunc r a -> MyFunc r b
+  -- fmap :: (a -> b) -> F (r -> a) -> F (r -> b)
+  --         f              g
+  fmap f (F g) = F (f . g)
+
+
+instance Applicative (MyFunc r) where
+  pure x = F (\_ -> x)
+  -- (<*>) :: MyFunc r (a -> b) -> MyFunc r a -> MyFunc r b
+  -- (<*>) :: F (r -> (a -> b)) -> F (r -> a) -> F (r -> b)
+  F f <*> F g = F (\x -> f x (g x))
+
+
+instance Monad (MyFunc r) where
+  -- return :: a -> m a
+  return x = F (\_ -> x)
+  -- (>>=) :: MyFunc r a -> (a -> MyFunc r b) -> MyFunc r b
+  -- (>>=) :: F (r -> a) -> (a -> F (r -> b)) -> F (r -> b)
+  F g >>= h = F (\x -> applyF (h (g x)) x)
+
