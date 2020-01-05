@@ -25,3 +25,4 @@ instance Functor Tree where
 
 inc'' :: Functor f => f Int -> f Int
 inc'' = fmap (+ 1)
+
