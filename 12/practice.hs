@@ -44,3 +44,40 @@ instance Applicative MyZipList where
   -- (<*>) :: ZipList (a -> b) -> ZipList a -> ZipList b
   (Z gs) <*> (Z xs) = Z (zipWith (\f x -> f x) gs xs)
 
+-- 12.5.5
+-- アプリカティブ則
+-- pure id <*> x   = x
+-- pure (g x)      = pure g <*> pure x
+-- x <*> pure y    = pure (\g -> g y) <*> x
+-- x <*> (y <*> z) = (pure (.) <*> x <*> y) <*> z
+--
+-- Maybe Int でチェック
+-- pure id <*> x   = x
+-- 左辺
+--  id :: Int -> Int
+--  x  :: Myabe Int
+-- 右辺
+--  x  :: Mybe Int
+
+-- pure (g x)      = pure g <*> pure x
+-- 左辺
+--  g :: Int -> a
+--  x :: Int
+-- 右辺
+--  g :: Int -> a
+--  x :: Int
+
+-- x <*> pure y    = pure (\g -> g y) <*> x
+-- 左辺
+--  x :: Int -> a
+--  y :: Int
+-- 右辺
+--  g :: Int -> a
+--  x :: Maybe Int
+
+-- x <*> (y <*> z) = (pure (.) <*> x <*> y) <*> z
+-- 左辺
+-- x :: Maby (a -> b)
+-- y :: Maby (Int -> a)
+-- z : Maybe Int
+-- 右辺
