@@ -122,3 +122,26 @@ instance Monad (MyFunc r) where
   -- (>>=) :: F (r -> a) -> (a -> F (r -> b)) -> F (r -> b)
   F g >>= h = F (\x -> applyF (h (g x)) x)
 
+-- 12.5.7
+data Expr a = Var a | Val Int | Add (Expr a) (Expr a)
+            deriving Show
+
+expr1 :: Expr String
+expr1 = Add (Add (Var "var1") (Val 2)) (Add (Val 3) (Var "var2"))
+
+eval :: Expr Int -> Int
+eval (Var x  ) = x
+eval (Val x  ) = x
+eval (Add l r) = eval l + eval r
+
+dict :: String -> Int
+dict "var1" = 10
+dict "var2" = 20
+dict _      = 0
+
+instance Functor Expr where
+  -- fmap :: (a -> b) -> Expr a -> Expr b
+  fmap f (Var a  ) = Var (f a)
+  fmap _ (Val x  ) = Val x
+  fmap f (Add l r) = Add (fmap f l) (fmap f r)
+
