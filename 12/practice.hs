@@ -142,6 +142,15 @@ dict _      = 0
 instance Functor Expr where
   -- fmap :: (a -> b) -> Expr a -> Expr b
   fmap f (Var a  ) = Var (f a)
-  fmap _ (Val x  ) = Val x
   fmap f (Add l r) = Add (fmap f l) (fmap f r)
+  fmap _ (Val x  ) = Val x
+
+instance Applicative Expr where
+  -- pure :: a -> Expr a
+  pure x = Var x
+
+  -- fmap :: Expr (a -> b) -> Expr a -> Expr b
+  (Var f) <*> (Var x  ) = Var (f x)
+  (Var _) <*> (Val x  ) = Val x
+  (Var f) <*> (Add l r) = Add (fmap f l) (fmap f r)
 
