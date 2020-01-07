@@ -139,6 +139,11 @@ dict "var1" = 10
 dict "var2" = 20
 dict _      = 0
 
+dictM :: String -> Expr Int
+dictM "var1" = Var 10
+dictM "var2" = Var 20
+dictM _      = Var 0
+
 instance Functor Expr where
   -- fmap :: (a -> b) -> Expr a -> Expr b
   fmap f (Var a  ) = Var (f a)
@@ -153,4 +158,10 @@ instance Applicative Expr where
   (Var f) <*> (Var x  ) = Var (f x)
   (Var _) <*> (Val x  ) = Val x
   (Var f) <*> (Add l r) = Add (fmap f l) (fmap f r)
+
+instance Monad Expr where
+  -- (>>=) :: Expr a -> (a -> Expr b) -> Expr b
+  (Var x  ) >>= f = f x
+  (Add l r) >>= f = Add (l >>= f) (r >>= f)
+  (Val x  ) >>= _ = Val x
 
