@@ -165,3 +165,51 @@ instance Monad Expr where
   (Add l r) >>= f = Add (l >>= f) (r >>= f)
   (Val x  ) >>= _ = Val x
 
+-- 12.5.8
+-- まずオリジナルのSTの定義
+
+type State = [Int]
+newtype ST a = S (State -> (a, State))
+
+app :: ST a -> State -> (a, State)
+app (S f) = f
+
+instance Functor ST where
+  -- fmap :: (a -> b) -> ST a -> ST b
+  fmap f (S g) = S (\s -> let (x, s') = g s in (f x, s'))
+
+instance Applicative ST where
+  -- pure :: a -> ST a
+  pure x = S (\s -> (x, s))
+
+  -- (<*>) :: ST (a -> b) -> ST a -> ST b
+  (S ff) <*> (S gg) = S
+    (\s ->
+      let (f, s' ) = ff s
+          (x, s'') = gg s'
+      in  (f x, s'')
+    )
+
+instance Monad ST where
+  -- (>>=) :: ST a -> (a -> ST b) -> ST b
+  (S x) >>= f = S (\s -> let (v, s') = x s in app (f v) s')
+
+push :: Int -> ST ()
+push x = S (\xs -> ((), x : xs))
+
+pop :: ST Int
+pop = S (\(x : xs) -> (x, xs))
+
+-- app stackTest [1, 2, 3, 4]
+-- (2,[1,1,3,4])
+stackTest :: ST Int
+stackTest = do
+  a <- pop
+  _ <- pop
+  push 1
+  push a
+  push 2
+  pop
+
+
+
