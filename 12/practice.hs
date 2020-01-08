@@ -212,4 +212,45 @@ stackTest = do
   pop
 
 
+-- Monadの定義からApplicative, Functorを導出
+newtype ST' a = S' (State -> (a, State))
 
+app' :: ST' a -> State -> (a, State)
+app' (S' f) = f
+
+instance Monad ST' where
+  -- (>>=) :: ST a -> (a -> ST b) -> ST b
+  (S' x) >>= f = S' (\s -> let (v, s') = x s in app' (f v) s')
+
+instance Functor ST' where
+  -- fmap :: (a -> b) -> ST a -> ST b
+  fmap f st = do
+    x <- st
+    return (f x)
+
+instance Applicative ST' where
+  -- pure :: a -> ST a
+  pure x = S' (\s -> (x, s))
+
+  -- (<*>) :: ST (a -> b) -> ST a -> ST b
+  stf <*> stx = do
+    f <- stf
+    x <- stx
+    return (f x)
+
+push' :: Int -> ST' ()
+push' x = S' (\xs -> ((), x : xs))
+
+pop' :: ST' Int
+pop' = S' (\(x : xs) -> (x, xs))
+
+-- Functor の確認
+-- let st = pop'
+-- let st' = fmap (1+) st
+-- app' st' [1, 2, 3, 4]
+-- => (2,[2,3,4])
+
+-- Applicative の確認
+-- let st'' = pure (\x -> x * x) <*>  st'
+-- app' st'' [1, 2, 3, 4]
+-- => (4,[2,3,4])
