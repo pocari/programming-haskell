@@ -445,28 +445,3 @@ factor' =
           n <- natural
           return (Nat n)
 
--- expr = do
---   lhs <- term
---   do
---       _   <- symbol "+"
---       rhs <- expr
---       return (lhs + rhs)
---     <|> return lhs
---
--- term :: Parser Int
--- term = do
---   lhs <- factor
---   do
---       _   <- symbol "*"
---       rhs <- term
---       return (lhs * rhs)
---     <|> return lhs
--- 
--- factor :: Parser Int
--- factor =
---   do
---       _ <- symbol "("
---       e <- expr
---       _ <- symbol ")"
---       return e
---     <|> natural
