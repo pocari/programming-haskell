@@ -300,3 +300,90 @@ comment = do
   _ <- char '\n'
   return c
 
+-- 13.11.2
+-- 2番目の構文規則
+-- expr   ::= expr + expr | term
+-- term   ::= term * term | factor
+-- factor ::= ( expr ) | nat
+-- nat    ::= 0 | 1 | 2 |...
+--
+-- 2 + 3 + 4 の構文木
+--          expr
+--          /  \
+--         /    \
+--        /      \
+--       expr + expr
+--       /  \      \
+--      /    \     nat
+--     /      \     |
+--   expr  + expr   4
+--     |       |
+--    nat     nat
+--     |       |
+--     2       3
+--
+--
+--          expr
+--          /  \
+--         /    \
+--        /      \
+--       expr + expr
+--       |      /  \
+--      nat    /    \
+--       |    /      \
+--       2   expr +  expr
+--            |       |
+--           nat     nat
+--            |       |
+--            3       4
+
+-- 13.11.3
+-- 3番目の構文規則
+-- expr   ::= term + expr | term
+-- term   ::= factor * term | factor
+-- factor ::= ( expr ) | nat
+-- nat    ::= 0 | 1 | 2 |...
+
+-- 2 + 3
+--          expr
+--          /  \
+--         /    \
+--        /      \
+--      term  + expr
+--        |       |
+--       nat     nat
+--        |       |
+--        2       3
+
+-- 2 * 3 * 4
+--          expr
+--          /  \
+--         /    \
+--        /      \
+--     factor *  term
+--       /  \      \
+--      /    \     nat
+--     /      \     |
+-- factor  * term   4
+--     |       |
+--    nat     nat
+--     |       |
+--     2       3
+
+-- (2 + 3) + 4
+--             expr
+--             /  \
+--            /    \
+--           /      \
+--          term + expr
+--         /           \
+--        /           nat
+--    ( expr )         |
+--      /  \           4
+--     /    \
+--    /      \
+--  term  +  expr
+--   |       |
+--  nat     nat
+--   |       |
+--   2       3
