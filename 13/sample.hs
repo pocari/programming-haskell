@@ -397,3 +397,76 @@ comment = do
 -- nat    ::= 0 | 1 | 2 |...
 --
 -- expr, termそれぞれに term e, factor e の規則が出来たおかげで、数字だけの数式をパースするときに一度 '+'なり '*' の規則を適用して失敗したあとに数値にマッチする(最後の |termとかで)ことがなくなるから速くなる？？
+
+-- 13.11.5
+data Expr = Add Expr Expr
+          | Mul Expr Expr
+          | Nat Int
+          deriving Show
+
+evalExpr :: String -> Int
+evalExpr s = case parse expr' s of
+  [(e, [])] -> evalExprHelper e
+  [(_, xs)] -> error ("Unused input " ++ xs)
+  _         -> error "Invalid Input"
+ where
+  evalExprHelper :: Expr -> Int
+  evalExprHelper (Nat n  ) = n
+  evalExprHelper (Add l r) = evalExprHelper l + evalExprHelper r
+  evalExprHelper (Mul l r) = evalExprHelper l * evalExprHelper r
+
+expr' :: Parser Expr
+expr' = do
+  lhs <- term'
+  do
+      _   <- symbol "+"
+      rhs <- expr'
+      return (Add lhs rhs)
+    <|> return lhs
+
+term' :: Parser Expr
+term' = do
+  lhs <- factor'
+  do
+      _   <- symbol "*"
+      rhs <- term'
+      return (Mul lhs rhs)
+    <|> return lhs
+
+
+factor' :: Parser Expr
+factor' =
+  do
+      _ <- symbol "("
+      e <- expr'
+      _ <- symbol ")"
+      return e
+    <|> do
+          n <- natural
+          return (Nat n)
+
+-- expr = do
+--   lhs <- term
+--   do
+--       _   <- symbol "+"
+--       rhs <- expr
+--       return (lhs + rhs)
+--     <|> return lhs
+--
+-- term :: Parser Int
+-- term = do
+--   lhs <- factor
+--   do
+--       _   <- symbol "*"
+--       rhs <- term
+--       return (lhs * rhs)
+--     <|> return lhs
+-- 
+-- factor :: Parser Int
+-- factor =
+--   do
+--       _ <- symbol "("
+--       e <- expr
+--       _ <- symbol ")"
+--       return e
+--     <|> natural
