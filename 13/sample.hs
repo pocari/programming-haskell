@@ -291,3 +291,12 @@ run = do
   showbox
   clear
 
+---------------------------------------------------
+-- 13.11.1
+comment :: Parser String
+comment = do
+  _ <- string "--"
+  c <- many (sat (/= '\n'))
+  _ <- char '\n'
+  return c
+
