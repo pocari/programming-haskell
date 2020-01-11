@@ -119,3 +119,76 @@ int =
       n <- nat
       return (-n)
     <|> nat
+
+token :: Parser a -> Parser a
+token p = do
+  _ <- space
+  x <- p
+  _ <- space
+  return x
+
+identifier :: Parser String
+identifier = token ident
+
+natural :: Parser Int
+natural = token nat
+
+integer :: Parser Int
+integer = token int
+
+symbol :: String -> Parser String
+symbol = token . string
+
+nats :: Parser [Int]
+nats = do
+  _  <- symbol "["
+  n  <- natural
+  ns <- many
+    (do
+      _ <- symbol ","
+      natural
+    )
+  _ <- symbol "]"
+  return (n : ns)
+
+-- BNF
+-- expr   ::= term   ('+' expr | e)
+-- term   ::= factor ('*' term | e)
+-- factor ::= (expr) | nat
+-- nat    ::= 0 | 1 | 2 |...
+
+expr :: Parser Int
+expr = do
+  lhs <- term
+  do
+      _   <- symbol "+"
+      rhs <- expr
+      return (lhs + rhs)
+    <|> return lhs
+
+
+term :: Parser Int
+term = do
+  lhs <- factor
+  do
+      _   <- symbol "*"
+      rhs <- term
+      return (lhs * rhs)
+    <|> return lhs
+
+
+factor :: Parser Int
+factor =
+  do
+      _ <- symbol "("
+      e <- expr
+      _ <- symbol ")"
+      return e
+    <|> natural
+
+eval :: String -> Int
+eval s = case parse expr s of
+  [(n, [])] -> n
+  [(_, xs)] -> error ("Unused input " ++ xs)
+  _         -> error "Invalid Input"
+
