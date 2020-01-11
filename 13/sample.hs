@@ -404,6 +404,7 @@ data Expr = Add Expr Expr
           | Sub Expr Expr
           | Mul Expr Expr
           | Div Expr Expr
+          | Pow Expr Expr
           | MyInt Int
           deriving Show
 
@@ -415,11 +416,20 @@ evalExpr s = case parse expr' s of
  where
   evalExprHelper :: Expr -> Int
   evalExprHelper (MyInt n) = n
+  evalExprHelper (Pow l r) = evalExprHelper l ^ evalExprHelper r
   evalExprHelper (Add l r) = evalExprHelper l + evalExprHelper r
   evalExprHelper (Sub l r) = evalExprHelper l - evalExprHelper r
   evalExprHelper (Mul l r) = evalExprHelper l * evalExprHelper r
   evalExprHelper (Div l r) = evalExprHelper l `div` evalExprHelper r
 
+-- BNF
+-- expr'    ::= term'   ('+' expr' | ('-' expr') | e)
+-- term'    ::= factor' ('*' term' | ('/' expr') | e)
+-- factor'  ::= primary' ('^' factor | e)
+-- primary' ::= ( expr' ) | myint
+-- myint    ::= ... | -1 | 0 | 1 | ...
+
+-- expr'    ::= term'   ('+' expr' | ('-' expr') | e)
 expr' :: Parser Expr
 expr' = do
   lhs <- term'
@@ -433,6 +443,7 @@ expr' = do
           return (Sub lhs rhs)
     <|> return lhs
 
+-- term'    ::= factor' ('*' term' | ('/' expr') | e)
 term' :: Parser Expr
 term' = do
   lhs <- factor'
@@ -446,8 +457,19 @@ term' = do
           return (Div lhs rhs)
     <|> return lhs
 
+-- factor'  ::= primary' ('^' primary | e)
 factor' :: Parser Expr
-factor' =
+factor' = do
+  lhs <- primary'
+  do
+      _   <- symbol "^"
+      rhs <- factor'
+      return (Pow lhs rhs)
+    <|> return lhs
+
+-- primary' ::= ( expr' ) | myint
+primary' :: Parser Expr
+primary' =
   do
       _ <- symbol "("
       e <- expr'
