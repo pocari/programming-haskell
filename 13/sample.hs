@@ -399,9 +399,12 @@ comment = do
 -- expr, termそれぞれに term e, factor e の規則が出来たおかげで、数字だけの数式をパースするときに一度 '+'なり '*' の規則を適用して失敗したあとに数値にマッチする(最後の |termとかで)ことがなくなるから速くなる？？
 
 -- 13.11.5
+-- 13.11.6の - / の演算子の追加,自然数->整数への拡張もここを変更する
 data Expr = Add Expr Expr
+          | Sub Expr Expr
           | Mul Expr Expr
-          | Nat Int
+          | Div Expr Expr
+          | MyInt Int
           deriving Show
 
 evalExpr :: String -> Int
@@ -411,9 +414,11 @@ evalExpr s = case parse expr' s of
   _         -> error "Invalid Input"
  where
   evalExprHelper :: Expr -> Int
-  evalExprHelper (Nat n  ) = n
+  evalExprHelper (MyInt n) = n
   evalExprHelper (Add l r) = evalExprHelper l + evalExprHelper r
+  evalExprHelper (Sub l r) = evalExprHelper l - evalExprHelper r
   evalExprHelper (Mul l r) = evalExprHelper l * evalExprHelper r
+  evalExprHelper (Div l r) = evalExprHelper l `div` evalExprHelper r
 
 expr' :: Parser Expr
 expr' = do
@@ -422,6 +427,10 @@ expr' = do
       _   <- symbol "+"
       rhs <- expr'
       return (Add lhs rhs)
+    <|> do
+          _   <- symbol "-"
+          rhs <- expr'
+          return (Sub lhs rhs)
     <|> return lhs
 
 term' :: Parser Expr
@@ -431,8 +440,11 @@ term' = do
       _   <- symbol "*"
       rhs <- term'
       return (Mul lhs rhs)
+    <|> do
+          _   <- symbol "/"
+          rhs <- term'
+          return (Div lhs rhs)
     <|> return lhs
-
 
 factor' :: Parser Expr
 factor' =
@@ -442,6 +454,6 @@ factor' =
       _ <- symbol ")"
       return e
     <|> do
-          n <- natural
-          return (Nat n)
+          n <- integer
+          return (MyInt n)
 
