@@ -178,7 +178,7 @@ exprSubAdd :: Expr -> Parser Expr
 exprSubAdd lhs = do
   elems <- many
     (do
-      op <- (string "+" <|> string "-")
+      op <- string "+" <|> string "-"
       f  <- term
       return (op, f)
     )
@@ -196,7 +196,7 @@ termMulDiv :: Expr -> Parser Expr
 termMulDiv lhs = do
   elems <- many
     (do
-      op <- (string "*" <|> string "/")
+      op <- string "*" <|> string "/"
       f  <- factor
       return (op, f)
     )
