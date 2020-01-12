@@ -256,7 +256,7 @@ calc xs = do
       calc xs
 
 quit :: IO ()
-quit = goto (1, 14)
+quit = goto (1, 15)
 
 beep :: IO ()
 beep = putStr "\BEL"
@@ -273,8 +273,12 @@ clear = calc []
 
 eval :: String -> IO ()
 eval xs = case parse expr xs of
-  [(n, [])] -> calc (show n)
-  _         -> do
+  [(n, [] )] -> calc (show n)
+  [(_, out)] -> do
+    goto (1, 14)
+    putStrLn $ "error at: [" ++ out ++ "]"
+    calc xs
+  _ -> do
     _ <- beep
     calc xs
 
