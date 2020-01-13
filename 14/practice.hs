@@ -110,3 +110,8 @@ t1 = Node (Node (Node Leaf 0 Leaf) 1 (Node Leaf 2 Leaf)) 3 (Node Leaf 4 Leaf)
 --  /   \   /   \
 -- L     L L     L
 
+-- 14.5.5
+myFilterF :: Foldable t => (a -> Bool) -> t a -> [a]
+-- myFilterF f x = foldMap (\y -> if f y then [y] else []) x
+myFilterF f = foldMap (\y -> [ y | f y ])
+
