@@ -32,4 +32,24 @@ module Practice where
 fibs :: [Integer]
 fibs = 0 : 1 : [ x + y | (x, y) <- zip fibs (tail fibs) ]
 
+-- 15.9.5
 
+-- 問題がよく理解できなかったので断念ん
+-- data Tree a = Leaf | Node (Tree a) a (Tree a)
+--             deriving Show
+-- 
+-- t1 :: Tree Int
+-- t1 = Node (Node (Node Leaf 0 Leaf) 1 (Node Leaf 2 Leaf)) 3 (Node Leaf 4 Leaf)
+-- 
+-- repeat' :: Tree a -> [Tree a]
+-- repeat' Leaf = []
+-- repeat' x    = x : repeat' x
+-- 
+-- take' :: Int -> [Tree a] -> [a]
+-- take' _ Leaf         = []
+-- take' 0 (Node l x r):nodexs = [x] ++ take'
+-- take' n (Node l x r) = (take' (n - 1) l) ++ (take' (n - 1) r)
+-- 
+-- replicate' :: Int -> Tree a -> [a]
+-- replicate' n = take' n . repeat'
+-- 
