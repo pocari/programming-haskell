@@ -27,3 +27,9 @@ module Practice where
 -- -> 3 + 4
 -- -> 7
 -- の四段階で評価される
+
+-- 15.9.4
+fibs :: [Integer]
+fibs = 0 : 1 : [ x + y | (x, y) <- zip fibs (tail fibs) ]
+
+
