@@ -34,7 +34,7 @@ fibs = 0 : 1 : [ x + y | (x, y) <- zip fibs (tail fibs) ]
 
 -- 15.9.5
 
--- 問題がよく理解できなかったので断念ん
+-- 問題がよく理解できなかったので断念
 -- data Tree a = Leaf | Node (Tree a) a (Tree a)
 --             deriving Show
 -- 
@@ -52,4 +52,26 @@ fibs = 0 : 1 : [ x + y | (x, y) <- zip fibs (tail fibs) ]
 -- 
 -- replicate' :: Int -> Tree a -> [a]
 -- replicate' n = take' n . repeat'
--- 
+
+-- 15.9.6
+-- 仮の初期値
+initd :: Double
+initd = 1.0
+
+-- 仮の誤差
+mindelta :: Double
+mindelta = 0.0000001
+
+next' :: Double -> Double -> [Double]
+next' n = iterate (\b -> (b + n / b) / 2)
+
+sqroot :: Double -> Double
+sqroot n = findSqrt
+ where
+  next :: Double -> Double
+  next a = (a + n / a) / 2
+  nexts :: [Double]
+  nexts = iterate next initd
+  findSqrt =
+    head [ x | (x, y) <- zip nexts (tail nexts), abs (x - y) <= mindelta ]
+
