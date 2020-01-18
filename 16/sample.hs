@@ -270,4 +270,54 @@ countNode (Node2 l r) = countNode l + countNode r + 1
 -- (countNode l + countNode r + 1) + 1
 -- = {計算}
 -- countNode l + countNode r + 2
+
+-- 16.9.7
+-- functor則
+-- fmap id = id
+-- fmap (g . h) = fmap g . fmap h
+
+-- 1つ目
+-- fmap id Nothing
+-- = {fmap適用}
+-- Nothing
+--
+-- id Nothing
+-- = {idを適用}
+-- Nothing
+--
+-- fmap id (Just 5)
+-- = {fmap適用}
+-- Just 5
+--
+-- id (Just 5)
+-- = {idを適用}
+-- = Just 5
+--
+-- 2つ目
+-- fmap (g . h) Nothing
+-- = {fmap適用}
+-- Nothing
+--
+-- (fmap g . fmap h) Nothing
+-- = {(f . g) x = f (g x) を適用}
+-- fmap g (fmap h Nothing)
+-- = {内側のfmapを適用}
+-- fmap g Nothing
+-- = {fmapを適用}
+-- Nothing
+--
+-- fmap (g . h) (Just 5)
+-- = {fmapを適用}
+-- Just ((g . h) 5)
+-- = {(f . g) x = f (g x) を適用}
+-- Just (g (h 5))
+-- 
+-- (fmap g . fmap h) (Just 5)
+-- = {(f . g) x = f (g x) を適用}
+-- fmap g (fmap h (Just 5))
+-- = {内側のfmapを適用}
+-- fmap g (Just (h 5))
+-- -- {fmap適用}
+-- Just (g (h 5))
+
 --
