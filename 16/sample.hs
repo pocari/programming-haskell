@@ -143,3 +143,26 @@ add (Succ n) m = Succ (add n m)
 -- add (Succ m) n
 -- 終わり
 -- 定理1使ってないけどいいのか？？
+
+-- 16.9.3
+-- all (== x) (replicate n x)
+--
+-- n = 0のとき
+-- all (== x) (replicate 0 x)
+-- = replicate を計算
+-- all (== x) []
+-- = allを計算
+-- True
+--
+-- n = k で成り立つとして、n = k + 1の場合
+-- all (== x) (replicate (k + 1) x)
+-- = replicateを計算
+-- all (== x) (x : replicate k x)
+-- = all を適用
+-- ((== x) x) && all (== x) (replicate k x)
+-- = &&の左辺を計算
+-- True && all (== x) (replicate k x)
+-- = &&の右辺に仮定を適用
+-- True && True
+-- = && を計算
+-- True
