@@ -227,3 +227,47 @@ add (Succ n) m = Succ (add n m)
 -- = {仮定より}
 -- x : xs
 -- 終わり
+
+-- 16.9.6
+data Tree2 = Leaf2 Int | Node2 Tree2 Tree2
+
+t21 :: Tree2
+t21 = Node2 (Node2 (Node2 (Leaf2 1) (Node2 (Leaf2 2) (Leaf2 3))) (Leaf2 4))
+            (Leaf2 5)
+
+countLeaf :: Tree2 -> Int
+countLeaf (Leaf2 _  ) = 1
+countLeaf (Node2 l r) = countLeaf l + countLeaf r
+
+countNode :: Tree2 -> Int
+countNode (Leaf2 _  ) = 0
+countNode (Node2 l r) = countNode l + countNode r + 1
+
+-- 証明したいこと
+-- countLeaf t = countNode t + 1
+--
+-- 基底部:
+-- countLeaf (Leaf2 n)
+-- = countLeafを適用
+-- 1
+--
+-- countNode (Leaf2 n) + 1
+-- = {countLeafを適用}
+-- 0 + 1
+-- = {+ を計算}
+-- 1
+--
+-- 再帰部:
+-- countLeaf (Node l r)
+-- = {countLeafを適用}
+-- countLeaf l + countLeaf r
+-- = {l, rに関する仮定より}
+-- (countNode l + 1) + (countNode r + 1)
+-- = countNode l + countNode r + 2
+--
+-- countNode (Node l r) + 1
+-- = {countNodeを適用}
+-- (countNode l + countNode r + 1) + 1
+-- = {計算}
+-- countNode l + countNode r + 2
+--
