@@ -209,4 +209,23 @@ add (Succ n) m = Succ (add n m)
 -- = 定理2を逆適用
 -- ((x:xs) ++ ys) ++ zs
 -- 終わり
+
+-- 16.9.5
+-- take n xs ++ drop n xs = xs
 --
+-- n = 0, xs = []の場合
+-- take 0 xs ++ drop 0 xs
+-- = {takeと、dropをそれぞれ計算}
+-- [] ++ []
+-- = {++を計算}
+-- []
+--
+-- n > 1で再帰部
+-- take (k + 1) (x:xs) ++ drop (k + 1) (x:xs)
+-- = {take、dropをそれぞれ計算}
+-- (x : take k xs) ++ (drop k xs)
+-- = {16.9.4の(x:xs) ++ ys = x : (xs ++ ys)より}
+-- x : (take k xs ++ drop k xs)
+-- = {仮定より}
+-- x : xs
+-- 終わり
