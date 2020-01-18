@@ -74,4 +74,46 @@ comp' (Add l r) c = comp' l (comp' r (ADD : c))
 -- *Sample> exec (comp e1) []
 -- [10]
 
+data Nat = Zero | Succ Nat
+         deriving Show
+
+n1 :: Nat
+n1 = Succ (Succ (Succ Zero))
+
+n2 :: Nat
+n2 = Succ (Succ Zero)
+
+add :: Nat -> Nat -> Nat
+add Zero     m = m
+add (Succ n) m = Succ (add n m)
+
+-- 16.9.1
+-- add n (Succ m) = Succ (add n m)
+--
+-- 基底部:
+-- add Zero (Succ m)
+-- = {addを適用)
+-- Succ m
+-- = {mに関してaddを逆適用}
+-- Succ (add Zero m)
+--
+-- 再帰部: Succ (add (Succ x) m) を導出する
+-- add (Succ x) (Succ m)
+-- = {addを適用}
+-- Succ (add x (Succ m))
+-- = {xに関して仮定を適用}
+-- Succ (Succ (add x m))
+-- = {addを逆適用}
+-- Succ (Succ (add Zero (add x m)))
+-- = {add x m = z  とする}
+-- Succ (Succ (add Zero z))
+-- = {内側のsuccに関して基底部を逆適用する}
+-- Succ (add Zero (Succ z))
+-- = {addを適用}
+-- Succ (Succ z)
+-- = {zを展開}
+-- Succ (Succ (add x m))
+-- = {addを逆適用}
+-- Succ (add (Succ n) m)
+-- 終わり
 
