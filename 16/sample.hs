@@ -117,3 +117,29 @@ add (Succ n) m = Succ (add n m)
 -- Succ (add (Succ n) m)
 -- 終わり
 
+-- 16.9.2
+-- 定理1: add n (Succ m) = Succ (add n m) 16.9.1の内容
+-- 定理2: add n Zero = n
+-- は使っていいとして
+--
+-- add n m = add m n
+--
+-- を証明する
+--
+-- 基底部: add Zero m から add m Zero を導出する
+-- add Zero m
+-- = {addを適用}
+-- m
+-- = {定理2を逆適用}
+-- add m Zero
+--
+-- 再帰部: add (Succ n) m から add m (Succ n) を導出する
+-- add (Succ n) m
+-- = {addを適用}
+-- Succ (add n m)
+-- = {仮定を適用}
+-- Succ (add m n)
+-- = {addを逆適用}
+-- add (Succ m) n
+-- 終わり
+-- 定理1使ってないけどいいのか？？
