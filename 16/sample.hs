@@ -139,10 +139,8 @@ add (Succ n) m = Succ (add n m)
 -- Succ (add n m)
 -- = {仮定を適用}
 -- Succ (add m n)
--- = {addを逆適用}
--- add (Succ m) n
--- 終わり
--- 定理1使ってないけどいいのか？？
+-- = {定理1を適用}
+-- add m (Succ n)
 
 -- 16.9.3
 -- all (== x) (replicate n x)
