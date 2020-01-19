@@ -74,8 +74,7 @@ comp' (Add l r) c = comp' l (comp' r (ADD : c))
 -- *Sample> exec (comp e1) []
 -- [10]
 
-data Nat = Zero | Succ Nat
-         deriving Show
+data Nat = Zero | Succ Nat deriving Show
 
 n1 :: Nat
 n1 = Succ (Succ (Succ Zero))
@@ -378,4 +377,177 @@ instance Functor Tree where
 -- = {.を逆適用}
 -- (fmap g . fmap h) (Node h l)
 -- 終わり
+--
+-- 16.9.9
+-- Applicative則
+--   pure id <*> x = x
+--   pure (g x) = pure g <*> pure x
+--   x <*> pure y = pure (\g -> g y) <*> x
+--   x <*> (y <*> z) = (pure (.) <*> x <*> y) <*> z
+--
+-- # pure id <*> x = x
+-- ## Nothingの場合
+-- pure id <*> Nothing
+-- = <*> を計算
+-- Nothing
+--
+-- ## Just xの場合
+-- pure id <*> (Just x)
+-- = {<*>を計算}
+-- Just (id x)
+-- = {idを適用}
+-- Just x
+--
+-- # pure (g x) = pure g <*> pure x
+-- ## Nothingの場合
+-- pure (g Nothing)
+-- = {pureを適用}
+-- Just (g Nothing)
+-- = {fmapを逆適用}
+-- fmap g (Just Nothing)
+-- = Myabeのfmap = <*>なので置換
+-- (Just g) <*> (Just Nothing)
+-- = {それぞれのJustにpureを逆適用}
+-- pure g <*> pure Nothing
+--
+-- ## Just xの場合 pure (g (Just x)) から pure g <*> pure (Just x)
+-- pure (g (Just x))
+-- = {pureを適用}
+-- Just (g (Just x))
+-- = {fmapを逆適用}
+-- fmap g (Just (Just x))
+-- = {Myabeのfmap = <*>なので置換}
+-- (Just g) <*> (Just (Just x))
+-- = {それぞれのJustにpureを逆適用}
+-- pure g <*> pure (Just x)
+
+-- # x <*> pure y = pure (\g -> g y) <*> x
+-- ## Nothingの場合 Nothing <*> pure y から pure (\g -> g y) <*> Nothing を導出
+-- Nothing <*> pure y
+-- = {<*> を適用}
+-- Nothing
+--
+-- pure (\g -> g y) <*> Nothing
+-- = {<*>を適用}
+-- Nothing
+--
+-- ## Just xの場合 (Just x) <*> pure y から pure (\g -> g y) <*> (Just x) を導出
+-- (Just x) <*> pure y
+-- = {<*> を適用}
+-- Just (x y)
+-- = {x を (\g -> g y) に置き換え}
+-- Just ((\g -> g y) x)
+-- = {<*>を逆適用}
+-- pure (\g -> g y) <*> (Just x)
+--
+-- # x <*> (y <*> z) = (pure (.) <*> x <*> y) <*> z
+-- ## Nothingの場合: Nothing <*> (y <*> z) から (pure (.) <*> Nothing <*> y) <*> z を導出
+-- Nothing <*> (y <*> z)
+-- = {外側の<*>を適用}
+-- Nothing
+-- = {<*>を逆適用}
+-- Nothing <*> z
+-- = {<*>を逆適用}
+-- (Nothing <*> y) <*> z
+-- = {<*>を逆適用}
+-- (pure (.) <*> Nothing <*> y) <*> z
+--
+-- ## Just xの場合: (Just x) <*> (y <*> z) から (pure (.) <*> (Just x) <*> y) <*> z を導出
+-- こっちがどうもわからず。
+--
+-- 16.9.10
+-- 使う定理
+-- 定理1
+-- [k | k <- xs] = xs
+--
+-- 基底部: [k | k <- []] から []を導出
+-- [k | k <- []]
+-- = {定義から}
+-- []
+--
+-- 再帰部: [k | k <- (x:xs)] から (x:xs) を導出
+-- [k | k <- (x:xs)]
+-- = {定義から}
+-- x : [k | k <- xs]
+-- = {仮定から}
+-- x : xs
+-- 終わり
+--
+--
+-- instance Monad [] where
+--   -- (>>=) :: [a] -> (a -> [b]) -> [b]
+--   xs >>= f [y | x <- xs, y <- f x]
+--
+-- Monad則
+--   return x >>= f   = f x
+--   mx >>= return    = mx
+--   (mx >>= f) >>= g = mx >>= (\x -> (f x >>= g))
+--
+-- # return x >>= f = f x
+-- return x >>= f
+-- = {return を適用}
+-- [x] >>= f
+-- = {>>=を適用}
+-- [y | k <- [x], y <- f k]
+-- = {外側のkはxのみなので}
+-- [y | y <- f x]
+-- = {定理1から}
+-- f x
+-- 終わり
+-- 
+-- # mx >>= return    = mx
+-- [m | n <- mx, m <- return n]
+-- = {return nを適用}
+-- [m | n <- mx, m <- [n]]
+-- = {m <- [n] = nから}
+-- [n | n <- mx]
+-- = {定理1から}
+-- mx
+-- 終わり
+--
+-- # (mx >>= f) >>= g = mx >>= (\x -> (f x >>= g))
+--
+-- mx >>= f
+-- [n | m <- mx, n <- f m]
+-- concat $ map f mx
+--
+-- # (mx >>= f) >>= g = mx >>= (\x -> (f x >>= g))
+-- (concat $ map f mx) >>= g
+-- concat $ map g (concat $ map f mx)
+--
+-- mx >>= (\x -> (f x >>= g))
+-- concat $ map (\x -> (f x >>= g)) mx
+-- concat $ map (\x -> (concat $ map g (f x))) mx
+-- これも断念
+--
+-- 16.9.11
+-- comp' e c = comp e ++ c
+--
+comp :: Expr -> Code
+comp (Val n  ) = [PUSH n]
+comp (Add l r) = comp l ++ comp r ++ [ADD]
+
+-- 基底部: 
+-- comp' (Var n) c
+-- = {comp'の定義}
+-- comp (Var n) ++ c
+-- = {compを適用}
+-- [PUSH n] ++ c
+-- = {++を適用}
+-- PUSH n : c
+--
+-- 再帰部:
+-- comp' (Add l r)
+-- = {comp'の定義}
+-- comp (Add l r) ++ c
+-- = {compを適用}
+-- comp l ++ comp r ++ [ADD] ++ c
+-- = {最後の++を適用}
+-- comp l ++ comp r ++ (ADD : c)
+-- = {++の結合の性質から}
+-- comp l ++ (comp r ++ (ADD : c))
+-- = {仮定より}
+-- comp l ++ (comp' r (ADD : c))
+-- = {仮定より}
+-- comp' l (comp' r (ADD : c))
 --
