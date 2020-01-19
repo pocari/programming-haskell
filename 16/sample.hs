@@ -320,4 +320,62 @@ countNode (Node2 l r) = countNode l + countNode r + 1
 -- -- {fmap適用}
 -- Just (g (h 5))
 
+-- 16.9.8
+instance Functor Tree where
+  -- fmap :: (a -> b) -> Tree a -> Tree b
+  fmap f (Leaf x  ) = Leaf (f x)
+  fmap f (Node l r) = Node (fmap f l) (fmap f r)
+
+-- # functor則
+-- ## fmap id = id
+--
+-- 基底部: fmap id (Leaf x) から id (Leaf x) を導出
+-- fmap id (Leaf x)
+-- = {fmapを適用}
+-- Leaf (id x)
+-- = {idを適用}
+-- Leaf x
+-- = {idを逆適用}
+-- id (Leaf x)
+--
+-- 再帰部: fmap id (Node l r) から id (Node l r)を導出
+-- fmap id (Node l r)
+-- = {fmapを適用}
+-- Node (fmap id l) (fmap id r)
+-- = {l, rに関してfmap適用}
+-- Node l r
+-- = {idを逆適用}
+-- id (Node l r)
+-- 終わり
+--
+-- ## fmap (g . h) = fmap g . fmap h
+--
+-- 基底部: fmap (g . h) (Leaf x) から (fmap g . fmap h) (Leaf x) を導出
+-- fmap (g . h) (Leaf x)
+-- = {fmap を適用}
+-- Leaf ((g . h) x)
+-- = {. を適用}
+-- Leaf (g (h x))
+-- = {gに関してfmapを逆適用}
+-- fmap g (Leaf (h x))
+-- = {fに関してfmapを逆適用}
+-- fmap g (fmap h (Leaf x))
+-- = . を逆適用
+-- (fmap g . fmap h) (Leaf x)
+-- 
+-- 再帰部: fmap (g . h) (Node l r) から (fmap g . fmap h) (Node l r) を導出
+-- fmap (g . h) (Node l r)
+-- = {fmapを適用}
+-- Node (fmap (g . h) l) (fmap  (g . h) r)
+-- = {仮定を適用}
+-- Node ((fmap g . fmap h) l) ((fmap g . fmap h) r)
+-- = {.を適用}
+-- Node (fmap g (fmap h l)) (fmap g (fmap h r))
+-- = {fmapを逆適用}
+-- fmap g (Node (fmap h l) (fmap h r))
+-- = {fmapを逆適用}
+-- fmap g (fmap h (Node h l))
+-- = {.を逆適用}
+-- (fmap g . fmap h) (Node h l)
+-- 終わり
 --
