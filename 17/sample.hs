@@ -15,10 +15,15 @@ add :: Stack -> Stack
 add (m : n : xs) = (n + m) : xs
 add _            = error "invalid add operation"
 
-eval' :: Expr -> Stack -> Stack
-eval' (Val n  ) s = push n s
-eval' (Add l r) s = add (eval' l (eval' r s))
-
 eval :: Expr -> Int
 eval e = head $ eval' e []
+
+type Cont = Stack -> Stack
+
+eval' :: Expr -> Cont
+eval' e = eval'' e id
+
+eval'' :: Expr -> Cont -> Cont
+eval'' (Val n  ) c s = c (push n s)
+eval'' (Add x y) c s = eval'' x (eval'' y (c . add)) s
 
