@@ -36,3 +36,11 @@ pushC n c s = c (push n s)
 addC :: Cont -> Cont
 addC c = c . add
 
+data Code = HALT | PUSH Int Code | ADD Code
+          deriving Show
+
+exec :: Code -> Cont
+exec HALT       = haltC
+exec (PUSH n c) = pushC n (exec c)
+exec (ADD c   ) = addC (exec c)
+
