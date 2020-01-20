@@ -21,9 +21,18 @@ eval e = head $ eval' e []
 type Cont = Stack -> Stack
 
 eval' :: Expr -> Cont
-eval' e = eval'' e id
+eval' e = eval'' e haltC
 
 eval'' :: Expr -> Cont -> Cont
-eval'' (Val n  ) c s = c (push n s)
-eval'' (Add x y) c s = eval'' x (eval'' y (c . add)) s
+eval'' (Val n  ) c s = pushC n c s
+eval'' (Add x y) c s = eval'' x (eval'' y (addC c)) s
+
+haltC :: Cont
+haltC = id
+
+pushC :: Int -> Cont -> Cont
+pushC n c s = c (push n s)
+
+addC :: Cont -> Cont
+addC c = c . add
 
