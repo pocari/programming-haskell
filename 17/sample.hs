@@ -16,16 +16,16 @@ add (m : n : xs) = (n + m) : xs
 add _            = error "invalid add operation"
 
 eval :: Expr -> Int
-eval e = head $ eval' e []
+eval e = head $ exec (comp e) []
 
 type Cont = Stack -> Stack
 
-eval' :: Expr -> Cont
-eval' e = eval'' e haltC
+comp :: Expr -> Code
+comp e = comp' e HALT
 
-eval'' :: Expr -> Cont -> Cont
-eval'' (Val n  ) c s = pushC n c s
-eval'' (Add x y) c s = eval'' x (eval'' y (addC c)) s
+comp' :: Expr -> Code -> Code
+comp' (Val n  ) c = PUSH n c
+comp' (Add x y) c = comp' x (comp' y (ADD c))
 
 haltC :: Cont
 haltC = id
@@ -39,8 +39,9 @@ addC c = c . add
 data Code = HALT | PUSH Int Code | ADD Code
           deriving Show
 
-exec :: Code -> Cont
-exec HALT       = haltC
-exec (PUSH n c) = pushC n (exec c)
-exec (ADD c   ) = addC (exec c)
+exec :: Code -> Stack -> Stack
+exec HALT       s           = s
+exec (PUSH n c) s           = exec c (n : s)
+exec (ADD c   ) (m : n : s) = exec c (n + m : s)
+exec _          _           = error "invalid pattern"
 
