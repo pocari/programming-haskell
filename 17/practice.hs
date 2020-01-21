@@ -40,63 +40,59 @@ eval :: Expr -> Maybe Int
 eval e = head $ eval' e []
 
 eval' :: Expr -> Stack -> Stack
--- eval' e s = eval e : s
--- の仕様を満たす
--- eval' :: Expr -> Stack -> Stack
--- を探す
---
--- 基底部: Val
--- eval' (Val n) s
--- = {eval'の仕様}
--- eval (Val n) : s
--- = {evalを適用}
--- Just n : s
--- = {pushを逆適用}
--- push n s
-eval' (Val n)     s = push n s
---
--- 基底部: Throw
--- eval' Throw s
--- = {evalの仕様}
--- eval Throw : s
--- = {evalを適用}
--- Nothing : s
--- = {throwを逆適用}
--- throw s
-eval' Throw       s = throw s
---
--- 再帰部(Add):
--- eval' (Add x y) s
--- = {eval'の仕様}
--- eval (Add x y) x
--- = {evalを適用}
--- ((+) <$> eval x <*> eval y) : s
--- = {addを逆適用}
--- add (eval x : eval y : s)
--- = {xに対する仮定}
--- add (eval x (eval y : s))
--- = {yに対する仮定}
--- add (eval' x (eval' y s))
-eval' (Add   x y) s = add (eval' x (eval' y s))
---
--- 再帰部(Catch):
--- eval' (Catch x y) s
--- = {eval'の仕様}
--- eval (Catch x y) : s
--- = {evalを適用}
--- let e = case eval x of
---   Just n  -> Just n
---   Nothing -> eval h
--- in e : s
--- = {catchを逆適用}
--- catch (eval x : eval y : xs)
--- = {xに対する仮定}
--- catch (eval x (eval y : s))
--- = {yに対する仮定}
--- catch (eval' x (eval' y s))
-eval' (Catch x y) s = catch (eval' x (eval' y s))
+eval' e = eval'' e id
 
--- type Cont = Stack -> Stack
+type Cont = Stack -> Stack
+
+eval'' :: Expr -> Cont -> Cont
+-- eval'' e c = c (eval' e s)
+-- の仕様を満たす
+-- eval'' :: Expr -> Cont -> Cont
+-- を探す
+-- 
+-- 基底部: Val
+-- eval'' (Val n) c
+-- = {eval''の仕様}
+-- c (eval' (Val n) s)
+-- = {eval' を適用}
+-- c (push n s)
+eval'' (Val n)     c s = c (push n s)
+
+-- 基底部: Throw
+-- eval'' Throw c
+-- = {eval''の仕様}
+-- c (eval' Throw s)
+-- = {eval' を適用}
+-- c (throw s)
+eval'' Throw       c s = c (throw s)
+
+-- 再帰部: Add
+-- eval'' (Add x y) c
+-- = {eval''の仕様}
+-- c (eval' (Add x y) s)
+-- = {eval' を適用}
+-- c (add (eval' y (eval' x s)))
+-- = {.を逆適用}
+-- (c . add) (eval' y (eval' x s))
+-- = {yに対する仮定を適用}
+-- eval'' y (c .add) (eval' x s)
+-- = {xに対する仮定を適用}
+-- eval'' x (eval'' y (c . add)) s
+eval'' (Add   x y) c s = eval'' x (eval'' y (c . add)) s
+
+-- 再帰部: Catch
+-- eval'' (Catch x y) c
+-- = {eval''の仕様}
+-- c (eval' (Uatch x y) s)
+-- = {eval' を適用}
+-- c (catch (eval' y (eval' x s)))
+-- = {.を逆適用}
+-- (c . catch) (eval' y (eval' x s))
+-- = {yに対する仮定を適用}
+-- eval'' y (c .catch) (eval' x s)
+-- = {xに対する仮定を適用}
+-- eval'' y (eval'' x (c . catch)) s
+eval'' (Catch x y) c s = eval'' y (eval'' x (c . catch)) s
 
 -- comp :: Expr -> Code
 -- comp e = comp' e HALT
