@@ -123,10 +123,10 @@ data Code = HALT
           | CATCH Code
           deriving Show
 
-exec :: Code -> Cont
-exec HALT       = haltC
-exec (PUSH n c) = pushC n (exec c)
-exec (ADD   c ) = addC (exec c)
-exec (THROW c ) = throwC (exec c)
-exec (CATCH c ) = catchC (exec c)
+exec :: Code -> Stack -> Stack
+exec HALT       s = haltC s
+exec (PUSH n c) s = pushC n (exec c) s
+exec (ADD   c ) s = addC (exec c) s
+exec (THROW c ) s = throwC (exec c) s
+exec (CATCH c ) s = catchC (exec c) s
 
