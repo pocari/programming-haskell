@@ -53,7 +53,7 @@ eval' :: Expr -> Stack -> Stack
 -- Just n : s
 -- = {pushを逆適用}
 -- push n s
-eval' (Val n)     s = Just n : s
+eval' (Val n)     s = push n s
 --
 -- 基底部: Throw
 -- eval' Throw s
