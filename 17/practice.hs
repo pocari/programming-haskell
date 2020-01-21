@@ -116,12 +116,17 @@ addC c = c . add
 catchC :: Cont -> Cont
 catchC c = c . catch
 
--- data Code = HALT | PUSH Int Code | ADD Code
---           deriving Show
--- 
--- exec :: Code -> Stack -> Stack
--- exec HALT       s           = s
--- exec (PUSH n c) s           = exec c (n : s)
--- exec (ADD c   ) (m : n : s) = exec c (n + m : s)
--- exec _          _           = error "invalid pattern"
+data Code = HALT
+          | PUSH Int Code
+          | ADD Code
+          | THROW Code
+          | CATCH Code
+          deriving Show
+
+exec :: Code -> Cont
+exec HALT       = haltC
+exec (PUSH n c) = pushC n (exec c)
+exec (ADD   c ) = addC (exec c)
+exec (THROW c ) = throwC (exec c)
+exec (CATCH c ) = catchC (exec c)
 
