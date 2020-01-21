@@ -40,7 +40,7 @@ eval :: Expr -> Maybe Int
 eval e = head $ eval' e []
 
 eval' :: Expr -> Stack -> Stack
-eval' e = eval'' e id
+eval' e = eval'' e haltC
 
 type Cont = Stack -> Stack
 
@@ -56,7 +56,7 @@ eval'' :: Expr -> Cont -> Cont
 -- c (eval' (Val n) s)
 -- = {eval' を適用}
 -- c (push n s)
-eval'' (Val n)     c s = c (push n s)
+eval'' (Val n)     c s = pushC n c s
 
 -- 基底部: Throw
 -- eval'' Throw c
@@ -64,7 +64,7 @@ eval'' (Val n)     c s = c (push n s)
 -- c (eval' Throw s)
 -- = {eval' を適用}
 -- c (throw s)
-eval'' Throw       c s = c (throw s)
+eval'' Throw       c s = throwC c s
 
 -- 再帰部: Add
 -- eval'' (Add x y) c
@@ -78,7 +78,7 @@ eval'' Throw       c s = c (throw s)
 -- eval'' y (c .add) (eval' x s)
 -- = {xに対する仮定を適用}
 -- eval'' x (eval'' y (c . add)) s
-eval'' (Add   x y) c s = eval'' x (eval'' y (c . add)) s
+eval'' (Add   x y) c s = eval'' x (eval'' y (addC c)) s
 
 -- 再帰部: Catch
 -- eval'' (Catch x y) c
@@ -92,7 +92,7 @@ eval'' (Add   x y) c s = eval'' x (eval'' y (c . add)) s
 -- eval'' y (c .catch) (eval' x s)
 -- = {xに対する仮定を適用}
 -- eval'' y (eval'' x (c . catch)) s
-eval'' (Catch x y) c s = eval'' y (eval'' x (c . catch)) s
+eval'' (Catch x y) c s = eval'' y (eval'' x (catchC c)) s
 
 -- comp :: Expr -> Code
 -- comp e = comp' e HALT
@@ -101,15 +101,21 @@ eval'' (Catch x y) c s = eval'' y (eval'' x (c . catch)) s
 -- comp' (Val n  ) c = PUSH n c
 -- comp' (Add x y) c = comp' x (comp' y (ADD c))
 -- 
--- haltC :: Cont
--- haltC = id
--- 
--- pushC :: Int -> Cont -> Cont
--- pushC n c s = c (push n s)
--- 
--- addC :: Cont -> Cont
--- addC c = c . add
--- 
+haltC :: Cont
+haltC = id
+
+pushC :: Int -> Cont -> Cont
+pushC n c s = c (push n s)
+
+throwC :: Cont -> Cont
+throwC c = c . throw
+
+addC :: Cont -> Cont
+addC c = c . add
+
+catchC :: Cont -> Cont
+catchC c = c . catch
+
 -- data Code = HALT | PUSH Int Code | ADD Code
 --           deriving Show
 -- 
